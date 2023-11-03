@@ -120,7 +120,7 @@ public class GildedRoseTest {
 	    @Test
 	    public void testUpdateQualityNormalItemQualityDecreases() {
 	        GildedRose gildedRose = new GildedRose();
-	        Item normalItem = new Item("Normal Item", 5, 10);
+	        Item normalItem = new Item("+5 Dexterity Vest", 5, 10);
 	        gildedRose.setItem(normalItem);
 
 	        gildedRose.oneDay(); // Normal item, quality decreases
@@ -131,7 +131,7 @@ public class GildedRoseTest {
 	    @Test
 	    public void testUpdateQualityNormalItemQualityNeverNegative() {
 	        GildedRose gildedRose = new GildedRose();
-	        Item normalItem = new Item("Normal Item", 5, 0);
+	        Item normalItem = new Item("+5 Dexterity Vest", 5, 0);
 	        gildedRose.setItem(normalItem);
 
 	        gildedRose.oneDay(); // Normal item, quality never goes negative
@@ -260,6 +260,12 @@ public class GildedRoseTest {
 		}
 	    
 	    
+		
+		
+		
+
+		
+		
 	    
 	    
 	    @Test
@@ -273,6 +279,73 @@ public class GildedRoseTest {
 
 	        gildedRose.oneDay(); // }
 	    }
+	    
+	    
+	    
+	    
+	    // LOOP TESTS
+	    
+	    @Test
+	    public void testUpdateQualityConjuredItemQualityDecreasesTwiceAsFast() {
+	        GildedRose gildedRose = new GildedRose();
+	        Item conjuredItem = new Item("Conjured Mana Cake", 5, 10);
+	        gildedRose.setItem(conjuredItem);
+
+	        gildedRose.oneDay(); // Conjured item, quality decreases by 2
+
+	        assertEquals(8, conjuredItem.getQuality());
+	    }   
+	   
+	    @Test
+	    public void testUpdateQualityConjuredItemQualityNeverNegative() {
+	        GildedRose gildedRose = new GildedRose();
+	        Item conjuredItem = new Item("Conjured Mana Cake", 5, 1);
+	        gildedRose.setItem(conjuredItem);
+
+	        gildedRose.oneDay(); // Conjured item, quality never goes negative
+
+	        assertEquals(0, conjuredItem.getQuality());
+	    }
+	    
+	    @Test
+	    public void testUpdateQualityBackstagePassesQualityNeverExceeds50() {
+	        GildedRose gildedRose = new GildedRose();
+	        Item backstagePasses = new Item("Backstage passes to a TAFKAL80ETC concert", 5, 49);
+	        gildedRose.setItem(backstagePasses);
+
+	        gildedRose.oneDay(); // Backstage passes, quality should not exceed 50
+
+	        assertEquals(50, backstagePasses.getQuality());
+	    }
+
+	    @Test
+	    public void testUpdateQualityAgedBrieQualityNeverExceeds50() {
+	        GildedRose gildedRose = new GildedRose();
+	        Item agedBrie = new Item("Aged Brie", 5, 50);
+	        gildedRose.setItem(agedBrie);
+
+	        gildedRose.oneDay(); // Aged Brie, quality should not exceed 50
+
+	        assertEquals(50, agedBrie.getQuality());
+	    }
+	    
+	    
+	    
+	    @Test
+	    public void testUpdateQualityAgedBrieQualityIncreases() {
+	        GildedRose gildedRose = new GildedRose();
+	        Item agedBrie = new Item("Aged Brie", 5, 10);
+	        gildedRose.setItem(agedBrie);
+
+	        gildedRose.oneDay(); // Aged Brie, quality increases
+
+	        assertEquals(11, agedBrie.getQuality());
+	    }
+	    
+	    
+	    
+	    
+	    
 }
 	        
 
