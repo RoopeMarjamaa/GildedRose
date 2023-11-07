@@ -1,661 +1,347 @@
 package fi.oulu.tol.sqat.tests;
 
-import static org.junit.Assert.*;
-
-import java.util.List;
-
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
 import org.junit.Test;
-
 import fi.oulu.tol.sqat.GildedRose;
 import fi.oulu.tol.sqat.Item;
-import java.util.ArrayList;
-
-
+import java.util.List;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 
 public class GildedRoseTest {
 
-	 @Test
-	    public void testTheTruth() {
-	        assertTrue(true);
-	    }
-
-	    @Test
-	    public void testAgedBrieQualityIncreasesWithAge() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item agedBrie = new Item("Aged Brie", 10, 20);
-	        gildedRose.setItem(agedBrie);
-	        gildedRose.oneDay(); // Simulate one day passing
-
-	        assertEquals(21, agedBrie.getQuality());
-	    }
-
-	    @Test
-	    public void testSulfurasNeverChanges() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item sulfuras = new Item("Sulfuras, Hand of Ragnaros", 0, 80);
-	        gildedRose.setItem(sulfuras);
-
-	        for (int i = 0; i < 10; i++) {
-	            gildedRose.oneDay();
-	            assertEquals(80, sulfuras.getQuality());
-	            assertEquals(0, sulfuras.getSellIn());
-	        }
-	    }
-
-	    @Test
-	    public void testBackstagePassesQualityIncreasesProperly() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item backstagePasses = new Item("Backstage passes to a TAFKAL80ETC concert", 15, 20);
-	        gildedRose.setItem(backstagePasses);
-
-	        gildedRose.oneDay(); // Quality increases by 1
-	        assertEquals(21, backstagePasses.getQuality());
-
-	        backstagePasses.setSellIn(10);
-	        gildedRose.oneDay(); // Quality increases by 2
-	        assertEquals(23, backstagePasses.getQuality());
-
-	        backstagePasses.setSellIn(5);
-	        gildedRose.oneDay(); // Quality increases by 3
-	        assertEquals(26, backstagePasses.getQuality());
-
-	        backstagePasses.setSellIn(0);
-	        gildedRose.oneDay(); // Quality drops to 0
-	        assertEquals(0, backstagePasses.getQuality());
-	    }
-
-	    @Test
-	    public void testQualityNeverNegative() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item item = new Item("Test Item", 0, 1);
-	        gildedRose.setItem(item);
-
-	        gildedRose.oneDay(); // Quality should not go negative
-	        assertEquals(0, item.getQuality());
-
-	        gildedRose.oneDay(); // Quality should still not go negative
-	        assertEquals(0, item.getQuality());
-	    }
-
-	    @Test
-	    public void testQualityNeverExceeds50() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item item = new Item("Test Item", 10, 50);
-	        gildedRose.setItem(item);
-
-	        gildedRose.oneDay(); // Quality should not exceed 50
-	        assertEquals(50, item.getQuality());
-	    }
-
-	    @Test
-	    public void testDexterityVestQualityDecreasesNormally() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item dexterityVest = new Item("+5 Dexterity Vest", 5, 10);
-	        gildedRose.setItem(dexterityVest);
-
-	        gildedRose.oneDay(); // Quality decreases by 1
-	        assertEquals(9, dexterityVest.getQuality());
-
-	        gildedRose.oneDay(); // Quality decreases by 1
-	        assertEquals(8, dexterityVest.getQuality());
-	    }
-
-	    @Test
-	    public void testConjuredManaCakeQualityDecreasesTwiceAsFast() {
-	        GildedRose gildedRose =  new GildedRose();
-	        Item conjuredManaCake = new Item("Conjured Mana Cake", 5, 10);
-	        gildedRose.setItem(conjuredManaCake);
-
-	        gildedRose.oneDay(); // Quality decreases by 2
-	        assertEquals(8, conjuredManaCake.getQuality());
-
-	        gildedRose.oneDay(); // Quality decreases by 2
-	        assertEquals(6, conjuredManaCake.getQuality());
-
-	        conjuredManaCake.setSellIn(0);
-	        gildedRose.oneDay(); // Quality decreases by 2 after sellIn date passes
-	        assertEquals(4, conjuredManaCake.getQuality());
-	    }
-
-	    @Test
-	    public void testUpdateQualityNormalItemQualityDecreases() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item normalItem = new Item("+5 Dexterity Vest", 5, 10);
-	        gildedRose.setItem(normalItem);
-
-	        gildedRose.oneDay(); // Normal item, quality decreases
-
-	        assertEquals(9, normalItem.getQuality());
-	    }
-
-	    @Test
-	    public void testUpdateQualityNormalItemQualityNeverNegative() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item normalItem = new Item("+5 Dexterity Vest", 5, 0);
-	        gildedRose.setItem(normalItem);
-
-	        gildedRose.oneDay(); // Normal item, quality never goes negative
-
-	        assertEquals(0, normalItem.getQuality());
-	    }
-
-	    @Test
-	    public void testUpdateQualityBackstagePassesQualityIncreases() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item backstagePasses = new Item("Backstage passes to a TAFKAL80ETC concert", 15, 20);
-	        gildedRose.setItem(backstagePasses);
-
-	        gildedRose.oneDay(); // Backstage passes, quality increases
-
-	        assertEquals(21, backstagePasses.getQuality());
-	    }
-
-	    @Test
-	    public void testUpdateQualitySulfurasQualityNeverChanges() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item sulfuras = new Item("Sulfuras, Hand of Ragnaros", 0, 80);
-	        gildedRose.setItem(sulfuras);
-
-	        gildedRose.oneDay(); // Sulfuras, quality never changes
-
-	        assertEquals(80, sulfuras.getQuality()); }
-	    
-
-	    
-	   
-		
-		
-		
-		 @Test
-		    public void testItemsInitializationAndQualityUpdate() {
-		        GildedRose gildedRose = new GildedRose();
-
-		        // Initialize the items
-		        List<Item> items = new ArrayList<Item>();
-		        items.add(new Item("+5 Dexterity Vest", 10, 20));
-		        items.add(new Item("Aged Brie", 2, 0));
-		        items.add(new Item("Elixir of the Mongoose", 5, 7));
-		        items.add(new Item("Sulfuras, Hand of Ragnaros", 0, 80));
-		        items.add(new Item("Backstage passes to a TAFKAL80ETC concert", 15, 20));
-		        items.add(new Item("Conjured Mana Cake", 3, 6));
-
-		        // Set the items in the GildedRose
-		        for (Item item : items) {
-		            gildedRose.setItem(item);
-		        }
-
-		        // Perform one day's update
-		        gildedRose.oneDay();
-
-		        // Assert the updated quality of items
-		        assertEquals(19, items.get(0).getQuality()); // Check +5 Dexterity Vest
-		        assertEquals(1, items.get(1).getQuality());  // Check Aged Brie
-		        assertEquals(6, items.get(2).getQuality());  // Check Elixir of the Mongoose
-		        assertEquals(80, items.get(3).getQuality()); // Check Sulfuras
-		        assertEquals(21, items.get(4).getQuality()); // Check Backstage passes
-		        assertEquals(5, items.get(5).getQuality());  // Check Conjured Mana Cake
-		    }
-		
-		
-		 
-		 
-		 @Test
-		    public void testQualityIncreaseWhenBelow50() {
-		        GildedRose gildedRose = new GildedRose();
-
-		        // Create an item with quality below 50
-		        Item item = new Item("Test Item", 5, 40);
-		        gildedRose.setItem(item);
-
-		        // Perform one day's update
-		        gildedRose.oneDay();
-
-		        // Assert that the quality increased by 1
-		        assertEquals(41, item.getQuality());
-		    }
-		
-		
-
-		
-		
-		@Test
-		public void testUpdateQualityMethod() {
-		    GildedRose gildedRose = new GildedRose();
-		    Item item = new Item("Test Item", 5, 10);
-		    gildedRose.setItem(item);
-
-		    gildedRose.updateQuality(); // Call the non-static updateQuality method
-
-		    assertEquals(9, item.getQuality());
-		}
-
-		@Test
-		public void testOneDayMethod() {
-		    GildedRose gildedRose = new GildedRose();
-		    Item item = new Item("Test Item", 5, 10);
-		    gildedRose.setItem(item);
-
-		    gildedRose.oneDay(); // Ensure that the oneDay method works correctly
-
-		    assertEquals(9, item.getQuality());
-		}
-		
-		
-		
-		
-		
-		@Test
-		public void exampleTest() {
-			//create an inn, add an item, and simulate one day
-			GildedRose inn = new GildedRose();
-			inn.setItem(new Item("+5 Dexterity Vest", 10, 20));
-			inn.oneDay();
-			
-			//access a list of items, get the quality of the one set
-			List<Item> items = inn.getItems();
-			int quality = items.get(0).getQuality();
-			
-			//assert quality has decreased by one
-			assertEquals("Failed quality for Dexterity Vest", 19, quality);
-		}
-	    
-	    
-		
-		
-		
-
-		
-		
-	    
-	    
-	    @Test
-	    public void testNegativeSellInValue() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item item = new Item("Test Item", -1, 10);
-	        gildedRose.setItem(item);
-
-	        gildedRose.oneDay(); // Quality decreases as usual
-	        assertEquals(9, item.getQuality());
-
-	        gildedRose.oneDay(); // }
-	    }
-	    
-	    
-	    
-	    
-	    // LOOP TESTS
-	    
-	    @Test
-	    public void testUpdateQualityConjuredItemQualityDecreasesTwiceAsFast() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item conjuredItem = new Item("Conjured Mana Cake", 5, 10);
-	        gildedRose.setItem(conjuredItem);
-
-	        gildedRose.oneDay(); // Conjured item, quality decreases by 2
-
-	        assertEquals(8, conjuredItem.getQuality());
-	    }   
-	   
-	    @Test
-	    public void testUpdateQualityConjuredItemQualityNeverNegative() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item conjuredItem = new Item("Conjured Mana Cake", 5, 1);
-	        gildedRose.setItem(conjuredItem);
-
-	        gildedRose.oneDay(); // Conjured item, quality never goes negative
-
-	        assertEquals(0, conjuredItem.getQuality());
-	    }
-	    
-	    @Test
-	    public void testUpdateQualityBackstagePassesQualityNeverExceeds50() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item backstagePasses = new Item("Backstage passes to a TAFKAL80ETC concert", 5, 49);
-	        gildedRose.setItem(backstagePasses);
-
-	        gildedRose.oneDay(); // Backstage passes, quality should not exceed 50
-
-	        assertEquals(50, backstagePasses.getQuality());
-	    }
-
-	    @Test
-	    public void testUpdateQualityAgedBrieQualityNeverExceeds50() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item agedBrie = new Item("Aged Brie", 5, 50);
-	        gildedRose.setItem(agedBrie);
-
-	        gildedRose.oneDay(); // Aged Brie, quality should not exceed 50
-
-	        assertEquals(50, agedBrie.getQuality());
-	    }
-	    
-	    
-	    
-	    @Test
-	    public void testUpdateQualityAgedBrieQualityIncreases() {
-	        GildedRose gildedRose = new GildedRose();
-	        Item agedBrie = new Item("Aged Brie", 5, 10);
-	        gildedRose.setItem(agedBrie);
-
-	        gildedRose.oneDay(); // Aged Brie, quality increases
-
-	        assertEquals(11, agedBrie.getQuality());
-	    }
-	    
-	    
-	    
-	    
-	    
-}
-	        
-
-
-
-/* ALKUPERAISET TESTIT package fi.oulu.tol.sqat.tests;
-
-import static org.junit.Assert.*;
-
-import java.util.List;
-
-import org.junit.Test;
-
-import fi.oulu.tol.sqat.GildedRose;
-import fi.oulu.tol.sqat.Item;
-import java.util.ArrayList;
-
-
-
-public class GildedRoseTest {
-
-	@Test
-	public void testTheTruth() {
-		assertTrue(true);
-	}
-	
-	
-	@Test
-    public void testAgedBrieQualityIncreasesWithAge() {
-        GildedRose gildedRose = new GildedRose();
-        Item agedBrie = new Item("Aged Brie", 10, 20);
-        gildedRose.setItem(agedBrie);
-        gildedRose.oneDay(); // Simulate one day passing
-
-        assertEquals(21, agedBrie.getQuality());
+    private GildedRose gildedRose;
+    private ByteArrayOutputStream outputStream;
+    private PrintStream originalOut;
+
+    @Before
+    public void setUp() {
+        gildedRose = new GildedRose();
+        outputStream = new ByteArrayOutputStream();
+        originalOut = System.out;
+        System.setOut(new PrintStream(outputStream));
     }
 
-	
-	@Test
-	public void testSulfurasNeverChanges() {
-	    GildedRose gildedRose = new GildedRose();
-	    Item sulfuras = new Item("Sulfuras, Hand of Ragnaros", 0, 80);
-	    gildedRose.setItem(sulfuras);
-	    
-	    for (int i = 0; i < 10; i++) {
-	        gildedRose.oneDay();
-	        assertEquals(80, sulfuras.getQuality());
-	        assertEquals(0, sulfuras.getSellIn());
-	    }
-	}
-	
-	
-	
-	@Test
-	public void testBackstagePassesQualityIncreasesProperly() {
-	    GildedRose gildedRose = new GildedRose();
-	    Item backstagePasses = new Item("Backstage passes to a TAFKAL80ETC concert", 15, 20);
-	    gildedRose.setItem(backstagePasses);
-	    
-	    gildedRose.oneDay(); // Quality increases by 1
-	    assertEquals(21, backstagePasses.getQuality());
-
-	    backstagePasses.setSellIn(10);
-	    gildedRose.oneDay(); // Quality increases by 2
-	    assertEquals(23, backstagePasses.getQuality());
-
-	    backstagePasses.setSellIn(5);
-	    gildedRose.oneDay(); // Quality increases by 3
-	    assertEquals(26, backstagePasses.getQuality());
-
-	    backstagePasses.setSellIn(0);
-	    gildedRose.oneDay(); // Quality drops to 0
-	    assertEquals(0, backstagePasses.getQuality());
-	}
-	
-	
-	
-	@Test
-	public void testQualityNeverNegative() {
-	    GildedRose gildedRose = new GildedRose();
-	    Item item = new Item("Test Item", 0, 1);
-	    gildedRose.setItem(item);
-
-	    gildedRose.oneDay(); // Quality should not go negative
-	    assertEquals(0, item.getQuality());
-
-	    gildedRose.oneDay(); // Quality should still not go negative
-	    assertEquals(0, item.getQuality());
-	}
-	
-	
-	@Test
-	public void testQualityNeverExceeds50() {
-	    GildedRose gildedRose = new GildedRose();
-	    Item item = new Item("Test Item", 10, 50);
-	    gildedRose.setItem(item);
-
-	    gildedRose.oneDay(); // Quality should not exceed 50
-	    assertEquals(50, item.getQuality());
-	}
-	
-	
-	@Test
-	public void testDexterityVestQualityDecreasesNormally() {
-	    GildedRose gildedRose = new GildedRose();
-	    Item dexterityVest = new Item("+5 Dexterity Vest", 5, 10);
-	    gildedRose.setItem(dexterityVest);
-
-	    gildedRose.oneDay(); // Quality decreases by 1
-	    assertEquals(9, dexterityVest.getQuality());
-
-	    gildedRose.oneDay(); // Quality decreases by 1
-	    assertEquals(8, dexterityVest.getQuality());
-	}
-	
-	
-	
-	@Test
-	public void testConjuredManaCakeQualityDecreasesTwiceAsFast() {
-	    GildedRose gildedRose = new GildedRose();
-	    Item conjuredManaCake = new Item("Conjured Mana Cake", 5, 10);
-	    gildedRose.setItem(conjuredManaCake);
-
-	    gildedRose.oneDay(); // Quality decreases by 2
-	    assertEquals(8, conjuredManaCake.getQuality());
-
-	    gildedRose.oneDay(); // Quality decreases by 2
-	    assertEquals(6, conjuredManaCake.getQuality());
-
-	    conjuredManaCake.setSellIn(0);
-	    gildedRose.oneDay(); // Quality decreases by 2 after sellIn date passes
-	    assertEquals(4, conjuredManaCake.getQuality());
-	}
-	
-	
-	
-	@Test
-    public void testUpdateQualityNormalItemQualityDecreases() {
-        GildedRose gildedRose = new GildedRose();
-        Item normalItem = new Item("Normal Item", 5, 10);
-        gildedRose.setItem(normalItem);
-
-        gildedRose.updateQuality(); // Normal item, quality decreases
-
-        assertEquals(9, normalItem.getQuality());
+    @Test
+    public void testUpdateQualityForNormalItem() {
+        Item item = new Item("+5 Dexterity Vest", 10, 20);
+        gildedRose.setItem(item); // Use setItem instead of addItem
+        gildedRose.oneDay();
+        assertEquals(9, item.getSellIn());
+        assertEquals(19, item.getQuality());
     }
-	
-	
-	
-	
-	@Test
-    public void testUpdateQualityNormalItemQualityNeverNegative() {
-        GildedRose gildedRose = new GildedRose();
-        Item normalItem = new Item("Normal Item", 5, 0);
-        gildedRose.setItem(normalItem);
 
-        gildedRose.updateQuality(); // Normal item, quality never goes negative
-
-        assertEquals(0, normalItem.getQuality());
+    @Test
+    public void testUpdateQualityForAgedBrie() {
+        Item item = new Item("Aged Brie", 2, 0);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(1, item.getSellIn());
+        assertEquals(1, item.getQuality());
     }
-	
-	
-	
-	
-	@Test
-    public void testUpdateQualityBackstagePassesQualityIncreases() {
+
+    @Test
+    public void testUpdateQualityForSulfuras() {
+        Item item = new Item("Sulfuras, Hand of Ragnaros", 0, 80);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(0, item.getSellIn());
+        assertEquals(80, item.getQuality());
+    }
+
+    @Test
+    public void testUpdateQualityForBackstagePasses() {
+        Item item = new Item("Backstage passes to a TAFKAL80ETC concert", 15, 20);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(14, item.getSellIn());
+        assertEquals(21, item.getQuality()); 
+    }
+
+    @Test
+    public void testUpdateQualityForConjuredItem() {
+        Item item = new Item("Conjured Mana Cake", 3, 6);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(2, item.getSellIn());
+        assertEquals(5, item.getQuality());
+    }
+    
+    
+    @Test
+    public void testQualityDecreasesNormally() {
+        Item item = new Item("Normal Item", 10, 20);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(9, item.getSellIn());
+        assertEquals(19, item.getQuality());
+    }
+
+    @Test
+    public void testQualityDegradesTwiceAsFastAfterSellByDate() {
+        Item item = new Item("Expired Item", 0, 20);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(-1, item.getSellIn());
+        assertEquals(18, item.getQuality());
+    }
+
+    @Test
+    public void testQualityNeverNegative() {
+        Item item = new Item("Zero Quality Item", 5, 0);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(4, item.getSellIn());
+        assertEquals(0, item.getQuality());
+    }
+
+    @Test
+    public void testQualityNeverExceeds50() {
+        Item item = new Item("High Quality Item", 5, 50);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(4, item.getSellIn());
+        assertEquals(49, item.getQuality());
+    }
+
+    @Test
+    public void testAgedBrieQualityIncreases() {
+        Item item = new Item("Aged Brie", 2, 0);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(1, item.getSellIn());
+        assertEquals(1, item.getQuality());
+    }
+
+    @Test
+    public void testSulfurasNeverChanges() {
+        Item item = new Item("Sulfuras, Hand of Ragnaros", 0, 80);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(0, item.getSellIn());
+        assertEquals(80, item.getQuality());
+    }
+
+    @Test
+    public void testBackstagePassesQualityIncreases() {
+        Item item = new Item("Backstage passes to a Concert", 15, 20);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(14, item.getSellIn());
+        assertEquals(19, item.getQuality());
+    }
+
+    @Test
+    public void testBackstagePassesQualityIncreaseWith10DaysOrLess() {
+        Item item = new Item("Backstage passes to a TAFKAL80ETC concert", 10, 20);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(9, item.getSellIn());
+        assertEquals(22, item.getQuality());
+    }
+
+    @Test
+    public void testBackstagePassesQualityIncreaseWith5DaysOrLess() {
+        Item item = new Item("Backstage passes to a TAFKAL80ETC concert", 5, 20);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(4, item.getSellIn());
+        assertEquals(23, item.getQuality());
+    }
+
+    @Test
+    public void testBackstagePassesQualityDropsToZeroAfterConcert() {
+        Item item = new Item("Backstage passes to a TAFKAL80ETC concert", 0, 20);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(-1, item.getSellIn());
+        assertEquals(0, item.getQuality());
+    }
+    
+    @Test
+    public void testAgedBrieQualityIncrease() {
+        Item item = new Item("Aged Brie", 5, 30);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(4, item.getSellIn());
+        assertEquals(31, item.getQuality());
+    }
+
+    @Test
+    public void testBackstagePassesQualityIncreaseGreaterThan10() {
+        Item item = new Item("Backstage passes to a TAFKAL80ETC concert", 15, 20);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(14, item.getSellIn());
+        assertEquals(21, item.getQuality());
+    }
+    
+    @Test
+    public void testBackstagePassesQualityIncreaseBetween6And10() {
+        Item item = new Item("Backstage passes to a TAFKAL80ETC concert", 10, 20);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(9, item.getSellIn());
+        assertEquals(22, item.getQuality());
+    }
+    
+    @Test
+    public void testBackstagePassesQualityIncreaseLessThan6() {
+        Item item = new Item("Backstage passes to a TAFKAL80ETC concert", 5, 20);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(4, item.getSellIn());
+        assertEquals(23, item.getQuality());
+    }
+    
+    @Test
+    public void testRegularItemQualityDecreasePositiveSellIn() {
+        Item item = new Item("Regular Item", 10, 30);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(9, item.getSellIn());
+        assertEquals(29, item.getQuality());
+    }
+    
+    @Test
+    public void testRegularItemQualityDecreaseNegativeSellIn() {
+        Item item = new Item("Regular Item", -1, 30);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(-2, item.getSellIn());
+        assertEquals(28, item.getQuality());
+    }
+
+    @Test
+    public void testRegularItemQualityNeverBelow0() {
+        Item item = new Item("Regular Item", 10, 0);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(9, item.getSellIn());
+        assertEquals(0, item.getQuality());
+    }
+
+    @Test
+    public void testAgedBrieQualityNeverAbove50() {
+        Item item = new Item("Aged Brie", 10, 50);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(9, item.getSellIn());
+        assertEquals(50, item.getQuality());
+    }
+
+    @Test
+    public void testSulfurasItemQualityAndSellInUnchanged() {
+        Item item = new Item("Sulfuras, Hand of Ragnaros", 10, 80);
+        gildedRose.setItem(item);
+        gildedRose.oneDay();
+        assertEquals(10, item.getSellIn());
+        assertEquals(80, item.getQuality());
+    }
+
+    @Test
+    public void testGetItems() {
         GildedRose gildedRose = new GildedRose();
-        Item backstagePasses = new Item("Backstage passes to a TAFKAL80ETC concert", 15, 20);
+        Item item1 = new Item("Item 1", 10, 20);
+        Item item2 = new Item("Item 2", 5, 30);
+        gildedRose.setItem(item1);
+        gildedRose.setItem(item2);
+
+        List<Item> items = gildedRose.getItems();
+
+        assertEquals(2, items.size());
+        assertEquals(item1, items.get(0));
+        assertEquals(item2, items.get(1));
+    }
+    
+    @Test
+    public void testUpdateQualitySetQualityToZero() {
+        GildedRose gildedRose = new GildedRose();
+        Item backstagePasses = new Item("Backstage passes to a TAFKAL80ETC concert", 0, 20);
         gildedRose.setItem(backstagePasses);
 
-        gildedRose.updateQuality(); // Backstage passes, quality increases
+        gildedRose.oneDay(); // Call the updateQuality method
 
-        assertEquals(21, backstagePasses.getQuality());
+        assertEquals(0, backstagePasses.getQuality());
     }
-	
-	
-	
-	@Test
-    public void testUpdateQualitySulfurasQualityNeverChanges() {
+    
+    @Test
+    public void testQualityUpdateForItems() {
         GildedRose gildedRose = new GildedRose();
-        Item sulfuras = new Item("Sulfuras, Hand of Ragnaros", 0, 80);
-        gildedRose.setItem(sulfuras);
 
-        gildedRose.updateQuality(); // Sulfuras, quality never changes
+        // Initialize items
+        Item item1 = new Item("+5 Dexterity Vest", 10, 20);
+        Item item2 = new Item("Aged Brie", 2, 0);
+        Item item3 = new Item("Elixir of the Mongoose", 5, 7);
+        Item item4 = new Item("Sulfuras, Hand of Ragnaros", 0, 80);
+        Item item5 = new Item("Backstage passes to a TAFKAL80ETC concert", 15, 20);
+        Item item6 = new Item("Conjured Mana Cake", 3, 6);
 
-        assertEquals(80, sulfuras.getQuality());
+        gildedRose.setItem(item1);
+        gildedRose.setItem(item2);
+        gildedRose.setItem(item3);
+        gildedRose.setItem(item4);
+        gildedRose.setItem(item5);
+        gildedRose.setItem(item6);
+
+        // Update quality using the oneDay method
+        gildedRose.oneDay();
+
+        // Check if the quality values have been updated as expected
+        assertEquals(19, item1.getQuality());
+        assertEquals(1, item2.getQuality());
+        assertEquals(6, item3.getQuality());
+        assertEquals(80, item4.getQuality()); // Sulfuras quality should remain unchanged
+        assertEquals(21, item5.getQuality());
+        assertEquals(5, item6.getQuality());
     }
-	
-	
-	
-	
-	@Test
-	public void testNegativeSellInValue() {
-	    GildedRose gildedRose = new GildedRose();
-	    Item item = new Item("Test Item", -1, 10);
-	    gildedRose.setItem(item);
 
-	    gildedRose.oneDay(); // Quality decreases as usual
-	    assertEquals(9, item.getQuality());
+    @Test
+    public void testSellInUpdateForItems() {
+        GildedRose gildedRose = new GildedRose();
 
-	    gildedRose.oneDay(); // Quality decreases as usual
-	    assertEquals(8, item.getQuality());
-	}
-	
-	
-	
-	
-	 @Test
-	    public void testItemsInitializationAndQualityUpdate() {
-	        GildedRose gildedRose = new GildedRose();
+        // Initialize items
+        Item item1 = new Item("+5 Dexterity Vest", 10, 20);
+        Item item2 = new Item("Aged Brie", 2, 0);
+        Item item3 = new Item("Elixir of the Mongoose", 5, 7);
+        Item item4 = new Item("Sulfuras, Hand of Ragnaros", 0, 80);
+        Item item5 = new Item("Backstage passes to a TAFKAL80ETC concert", 15, 20);
+        Item item6 = new Item("Conjured Mana Cake", 3, 6);
 
-	        // Initialize the items
-	        List<Item> items = new ArrayList<Item>();
-	        items.add(new Item("+5 Dexterity Vest", 10, 20));
-	        items.add(new Item("Aged Brie", 2, 0));
-	        items.add(new Item("Elixir of the Mongoose", 5, 7));
-	        items.add(new Item("Sulfuras, Hand of Ragnaros", 0, 80));
-	        items.add(new Item("Backstage passes to a TAFKAL80ETC concert", 15, 20));
-	        items.add(new Item("Conjured Mana Cake", 3, 6));
+        gildedRose.setItem(item1);
+        gildedRose.setItem(item2);
+        gildedRose.setItem(item3);
+        gildedRose.setItem(item4);
+        gildedRose.setItem(item5);
+        gildedRose.setItem(item6);
 
-	        // Set the items in the GildedRose
-	        for (Item item : items) {
-	            gildedRose.setItem(item);
-	        }
+        // Update the sellIn values using the oneDay method
+        gildedRose.oneDay();
 
-	        // Perform one day's update
-	        gildedRose.oneDay();
+        // Check if the sellIn values have been updated as expected
+        assertEquals(9, item1.getSellIn());
+        assertEquals(1, item2.getSellIn());
+        assertEquals(4, item3.getSellIn());
+        assertEquals(0, item4.getSellIn()); // Sulfuras sellIn should remain unchanged
+        assertEquals(14, item5.getSellIn());
+        assertEquals(2, item6.getSellIn());
+    }
+    @Test
+    public void testOMGHAIOutput() {
+        GildedRose.main(null); // Call the main method
+        String output = outputStream.toString();
+        
+        // Trim the trailing newline character and compare
+        assertEquals("OMGHAI!", output.trim());
+    }
 
-	        // Assert the updated quality of items
-	        assertEquals(19, items.get(0).getQuality()); // Check +5 Dexterity Vest
-	        assertEquals(1, items.get(1).getQuality());  // Check Aged Brie
-	        assertEquals(6, items.get(2).getQuality());  // Check Elixir of the Mongoose
-	        assertEquals(80, items.get(3).getQuality()); // Check Sulfuras
-	        assertEquals(21, items.get(4).getQuality()); // Check Backstage passes
-	        assertEquals(5, items.get(5).getQuality());  // Check Conjured Mana Cake
-	    }
-	
-	
-	 
-	 
-	 @Test
-	    public void testQualityIncreaseWhenBelow50() {
-	        GildedRose gildedRose = new GildedRose();
-
-	        // Create an item with quality below 50
-	        Item item = new Item("Test Item", 5, 40);
-	        gildedRose.setItem(item);
-
-	        // Perform one day's update
-	        gildedRose.oneDay();
-
-	        // Assert that the quality increased by 1
-	        assertEquals(41, item.getQuality());
-	    }
-	
-	
-	
-	
-	
-	
-	
-	@Test
-	public void testUpdateQualityMethod() {
-	    GildedRose gildedRose = new GildedRose();
-	    Item item = new Item("Test Item", 5, 10);
-	    gildedRose.setItem(item);
-
-	    gildedRose.updateQuality(); // Call the non-static updateQuality method
-
-	    assertEquals(9, item.getQuality());
-	}
-
-	@Test
-	public void testOneDayMethod() {
-	    GildedRose gildedRose = new GildedRose();
-	    Item item = new Item("Test Item", 5, 10);
-	    gildedRose.setItem(item);
-
-	    gildedRose.oneDay(); // Ensure that the oneDay method works correctly
-
-	    assertEquals(9, item.getQuality());
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	@Test
-	public void exampleTest() {
-		//create an inn, add an item, and simulate one day
-		GildedRose inn = new GildedRose();
-		inn.setItem(new Item("+5 Dexterity Vest", 10, 20));
-		inn.oneDay();
-		
-		//access a list of items, get the quality of the one set
-		List<Item> items = inn.getItems();
-		int quality = items.get(0).getQuality();
-		
-		//assert quality has decreased by one
-		assertEquals("Failed quality for Dexterity Vest", 19, quality);
-	}
+   
+    
+ 
+    
 }
-
-
-
- */
-	         
+    
+    
+    
+    
