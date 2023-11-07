@@ -336,7 +336,29 @@ public class GildedRoseTest {
         assertEquals("OMGHAI!", output.trim());
     }
 
+    // MUTATIONS
+    
+    
+
+    
+
    
+
+    @Test
+    public void testBackstagePassesQualityUpdateWithPositiveSellInMutant() {
+        GildedRose gildedRose = new GildedRose();
+        Item backstagePasses = new Item("Backstage passes to a TAFKAL80ETC concert", 1, 20);
+        gildedRose.setItem(backstagePasses);
+
+        // Apply a mutant that changes the conditional boundary
+        backstagePasses.setSellIn(1);
+
+        // Update the quality using the oneDay method
+        gildedRose.oneDay();
+
+        // Verify that quality is updated as expected when sellIn is positive
+        assertEquals(23, backstagePasses.getQuality());
+    }
     
  
     
